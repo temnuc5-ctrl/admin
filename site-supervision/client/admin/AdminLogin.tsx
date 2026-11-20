@@ -54,13 +54,15 @@ export default function AdminLogin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nom, prenom, pin }),
       });
-      const result = await response.json();
+      const result = await response.json().catch(() => null);
       if (!response.ok) {
-        if (result.invalidFields) {
+        if (result?.invalidFields) {
           setInvalidFields(result.invalidFields);
           return;
         }
-        throw new Error(result.error ?? "La connexion a échoué.");
+        throw new Error(
+          result?.error ?? "Le service de connexion est momentanément indisponible. Réessayez plus tard.",
+        );
       }
 
       const sessionResponse = await fetch("/api/admin/session", {
