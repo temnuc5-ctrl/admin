@@ -452,7 +452,8 @@ async function televerserBucket(
   contentType: string,
 ) {
   if (!config.serviceKey) return null;
-  const url = `${config.url}/storage/v1/object/${config.bucket}/${encodeURIComponent(chemin)}`;
+  const cheminEncode = chemin.split("/").map(encodeURIComponent).join("/");
+  const url = `${config.url}/storage/v1/object/${config.bucket}/${cheminEncode}`;
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -468,13 +469,14 @@ async function televerserBucket(
     const detail = await response.text().catch(() => "");
     throw new SupabaseRequestError(response.status, detail.slice(0, 300));
   }
-  return `${config.url}/storage/v1/object/public/${config.bucket}/${encodeURIComponent(chemin)}`;
+  return `${config.url}/storage/v1/object/public/${config.bucket}/${cheminEncode}`;
 }
 
 async function urlSignee(config: SupabaseConfig, chemin: string) {
   if (!config.serviceKey) return null;
+  const cheminEncode = chemin.split("/").map(encodeURIComponent).join("/");
   const response = await fetch(
-    `${config.url}/storage/v1/object/sign/${config.bucket}/${encodeURIComponent(chemin)}`,
+    `${config.url}/storage/v1/object/sign/${config.bucket}/${cheminEncode}`,
     {
       method: "POST",
       headers: {
