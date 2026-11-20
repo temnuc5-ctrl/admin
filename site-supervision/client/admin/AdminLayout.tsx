@@ -29,7 +29,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
   const [status, setStatus] = useState<"checking" | "ready" | "unauthorized">("checking");
   const [signingOut, setSigningOut] = useState(false);
-  const [supabase, setSupabase] = useState<{ supabase: boolean; bucket: string | null } | null>(null);
+  const [supabase, setSupabase] = useState<{
+    supabase: boolean;
+    bucket: string | null;
+    serviceRoleConfigured: boolean;
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -143,17 +147,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
           <div className="mt-3 flex items-center gap-2">
             <span
-              className={`h-1.5 w-1.5 ${supabase?.supabase ? "live-dot bg-lime" : "bg-amber"}`}
+              className={`h-1.5 w-1.5 ${supabase?.serviceRoleConfigured ? "live-dot bg-lime" : "bg-amber"}`}
               aria-hidden="true"
             />
             <span className="text-[12px] font-medium">
-              {supabase === null ? "Vérification…" : supabase.supabase ? "Supabase connecté" : "Supabase à configurer"}
+              {supabase === null
+                ? "Vérification…"
+                : supabase.serviceRoleConfigured
+                  ? "Accès serveur configuré"
+                  : supabase.supabase
+                    ? "Accès rapports limité"
+                    : "Supabase à configurer"}
             </span>
           </div>
           <p className="mt-2 text-[10px] leading-4 text-white/40">
-            {supabase?.supabase
+            {supabase?.serviceRoleConfigured
               ? `Lecture des rapports · bucket ${supabase.bucket ?? "dashboards"}`
-              : "Renseignez SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY côté serveur."}
+              : supabase?.supabase
+                ? "La clé anon est détectée, mais RLS bloque les rapports. Configurez SUPABASE_SERVICE_ROLE_KEY côté serveur."
+                : "Configurez SUPABASE_URL et SUPABASE_ANON_KEY côté serveur."}
           </p>
         </div>
 
